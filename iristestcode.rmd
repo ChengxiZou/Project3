@@ -1,0 +1,34 @@
+---
+title: "Untitled"
+author: "Chengxi Zou"
+date: '2022-07-31'
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+within the document. You can embed an R code chunk like this:
+
+```{r cars}
+iris
+?iris
+install.packages()
+install.packages("shinydashboard")
+a <- summary(iris$Sepal.Length)
+a
+table(iris$Sepal.Width)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

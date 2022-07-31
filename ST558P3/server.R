@@ -11,8 +11,27 @@ library(shiny)
 library(ggplot2)
 library(dplyr)
 library(shinydashboard)
-# Define server logic required to draw a histogram
+
 server <- function(input, output) {
+  # subset species data for tab 2
+  tab2CtableData <- reactive({
+    v2 <- input$v2
+    
+    tab2CtableData <- iris[,c(as.numeric(v2),5)]
+    
+    tab2CtableData
+  })
+  # contigency table for tab 2
+  output$ctable <- renderTable({
+    a <- tab2CtableData()
+    table(a)
+  })
+  
+    # 
+  output$speciestable <- renderTable({
+    table(iris$Species)
+  })
+    # subset species data for tab 4
     SpeciesData <- reactive({
       v <- input$v
       variable <- input$variable
@@ -24,11 +43,19 @@ server <- function(input, output) {
       irisSpeciesData
       })
     
-    # table
+    # data table for tab 4
     output$table <- renderTable({
       SpeciesData <- SpeciesData()
       SpeciesData
     })
+    
+    # summary
+    output$summary <- renderTable({
+      a <- summary(SpeciesData())
+      s <- data.frame(a)
+      s
+    })
+    
     
      output$downloadData <- downloadHandler(
        filename = function() {

@@ -59,7 +59,8 @@ ui <- dashboardPage(
                        
                        h4("The third tab is for data modeling."),br(),
                        
-                       h4("The fourth tab is for data browsing."),br(),
+                       h4("The fourth tab is for data browsing. There are two panels that you could select the
+                          species and relevant variables of flowers. There is a download functionality as well."),br(),
                        
                        h1("Related pictures"),br(),
                        
@@ -80,12 +81,21 @@ ui <- dashboardPage(
       # Second tab content
       tabItem(tabName = "widgets",
               fluidRow(
-                box(plotOutput("plot1", height = 250)),
+                sidebarPanel(
+                  selectizeInput("v2", "Choose contingency table Variable", selected = "Sepal.Length", choices = c("Sepal.Length"=1,
+                                                                                       "Sepal.Width"=2,"Petal.Length"=3,
+                                                                                       "Petal.Width"=4))
+                ),
                 
                 box(
                   title = "Controls",
                   sliderInput("slider", "Number of observations:", 1, 100, 50)
-                )
+                ),
+                
+                box(tableOutput("summary")),
+                
+                box(tableOutput("ctable"))
+                
               )
       ),
       # 3rd tab content
@@ -104,7 +114,9 @@ ui <- dashboardPage(
               ),
               
               mainPanel(
+                h3("You can download the data subset!"),
                 downloadLink('downloadData', 'Download'),
+                br(),
                 # plotOutput("sleepPlot"),
                 tableOutput("table")
               )
