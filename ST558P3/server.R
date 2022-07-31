@@ -25,6 +25,11 @@ server <- function(input, output) {
       irisSpeciesData
     })
     
+    url <- a("Google Homepage", href="https://www.google.com/")
+    output$tab <- renderUI({
+      paste("URL link:", url)
+    })
+    
     # output$info <- renderText({
       #get data
       # SpeciesData <- SpeciesData()
@@ -35,6 +40,15 @@ server <- function(input, output) {
       SpeciesData <- SpeciesData()
       SpeciesData
     })
+    
+     output$downloadData <- downloadHandler(
+       filename = function() {
+         paste('irisSpeciesData', Sys.Date(), '.csv', sep='')
+       },
+       content = function(SpeciesData) {
+         write.csv(data, SpeciesData)
+       }
+     )
     
   })
 }
