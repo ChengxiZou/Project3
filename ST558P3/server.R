@@ -17,5 +17,24 @@ server <- function(input, output) {
   output$plot1 <- renderPlot({
     data <- histdata[seq_len(input$slider)]
     hist(data)
+    
+    SpeciesData <- reactive({
+      v <- input$v
+      
+      irisSpeciesData <- iris %>% filter(Species == v)
+      irisSpeciesData
+    })
+    
+    # output$info <- renderText({
+      #get data
+      # SpeciesData <- SpeciesData()
+    # })
+    
+    output$table <- renderTable({
+      #get data
+      SpeciesData <- SpeciesData()
+      SpeciesData
+    })
+    
   })
 }

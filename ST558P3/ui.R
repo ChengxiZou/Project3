@@ -45,7 +45,18 @@ ui <- dashboardPage(
       ),
       # 4th tab content
       tabItem(tabName = "Data",
-              h2("Data")
+              h2("Data"),
+              
+              sidebarPanel(
+                selectizeInput("v", "Species", selected = "setosa", choices = levels(as.factor(iris$Species))),
+                br()
+              ),
+              
+              mainPanel(
+                # plotOutput("sleepPlot"),
+                tableOutput("table")
+              )
+              
       )
     )
   )
