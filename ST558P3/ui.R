@@ -38,8 +38,8 @@ ui <- dashboardPage(
                        the petals when in bloom."),br(),
                        h4("Petals are modified leaves that surround the reproductive parts of flowers.
                           They are often brightly colored or unusually shaped to attract pollinators."),br(),
-                       img(src='p1.png', align = "right"),br(),
-                       a(href="https://www.statology.org/iris-dataset-r/", "For more infomation please go to this Complete Guide!"),br(),
+                       tags$img(src='p1.png'),br(),
+                       br(),a(href="https://www.statology.org/iris-dataset-r/", "For more infomation please go to this Complete Guide!"),br(),
                        h3("∗ Tell the user the purpose of each tab (page) of the app"),br(),
                        h4("3"),br(),
                        h3("∗ Include a picture related to the data (for instance, if the data was about the world wildlife fund, you might include a picture of their logo)"),br()
