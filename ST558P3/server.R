@@ -15,7 +15,12 @@ library(shinydashboard)
 server <- function(input, output) {
     SpeciesData <- reactive({
       v <- input$v
+      variable <- input$variable
+      
       irisSpeciesData <- iris %>% filter(Species == v)
+      
+      if (variable > 1){irisSpeciesData <- irisSpeciesData[,c(as.numeric(variable)-1,5)]}
+      
       irisSpeciesData
       })
     

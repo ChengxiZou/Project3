@@ -26,11 +26,11 @@ ui <- dashboardPage(
     tabItems(
       # First tab content
       tabItem(tabName = "dashboard",
-              fluidRow(h3("The purpose of the app"),br(),
-                       h4("This app is specially designed for new R learners to get a better feeling of the iris data set
-                       that is often used when subsetting data, creating plots or doing analysis on with R."),br(),
+              fluidRow(h1("The purpose of the app"),br(),
+                       h4("The iris dataset is a built-in dataset in R. This app is specially designed for new R learners to get a better feeling of the iris data set
+                       that is often used when subsetting data, creating plots or doing analysis using R."),br(),
                        
-                       h3("The data and its source - and a link to more information about it"),br(),
+                       h1("The data and its source - and a link to more information about it"),br(),
                        
                        h4("This famous (Fisher's or Anderson's) iris data set gives the measurements in centimeters
                        of the variables sepal length and width and petal length and width, respectively,
@@ -46,10 +46,10 @@ ui <- dashboardPage(
                        
                        tags$img(src='p1.png'),br(),
                        
-                       br(),a(href="https://www.statology.org/iris-dataset-r/", "For more infomation please
-                              go to this Complete Guide!"),br(),
+                       br(),h2(a(href="https://www.statology.org/iris-dataset-r/", "For more infomation please
+                              go to this Complete Guide!")),br(),
                        
-                       h3("The purpose of each tab (page) of the app"),br(),
+                       h1("The purpose of each tab (page) of the app"),br(),
                        
                        h4("This app has four tabs. The first is this About tab now you are in -- it describes the
                           purpose of this app and some relevant knowledge about iris and flowers. I also added some
@@ -61,17 +61,17 @@ ui <- dashboardPage(
                        
                        h4("The fourth tab is for data browsing."),br(),
                        
-                       h3("Related pictures"),br(),
+                       h1("Related pictures"),br(),
                        
-                       h3("setosa:"),br(),
+                       h2("setosa:"),br(),
                        
                        tags$img(src='setosa.png'),br(),
                        
-                       h3("versicolor:"),br(),
+                       h2("versicolor:"),br(),
                        
                        tags$img(src='versicolor.png'),br(),
                        
-                       h3("virginica:"),br(),
+                       h2("virginica:"),br(),
                        
                        tags$img(src='virginica.png'),br(),
               )
@@ -98,7 +98,9 @@ ui <- dashboardPage(
               
               sidebarPanel(
                 selectizeInput("v", "Species", selected = "setosa", choices = levels(as.factor(iris$Species))),
-                br()
+                selectizeInput("variable", "variable", selected = "all", choices = c("all"=1,"Sepal.Length"=2,
+                                                                                     "Sepal.Width"=3,"Petal.Length"=4,
+                                                                                     "Petal.Width"=5))
               ),
               
               mainPanel(
