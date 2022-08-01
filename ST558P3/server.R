@@ -11,26 +11,37 @@ library(shiny)
 library(ggplot2)
 library(dplyr)
 library(shinydashboard)
+library(shinyjs)
 
 server <- function(input, output) {
   # subset species data for tab 2
-  tab2CtableData <- reactive({
-    v2 <- input$v2
+  tab2Data <- reactive({
+    tab2species <- input$stab2
+    tab2variable <- input$vtab2
     
-    tab2CtableData <- iris[,c(as.numeric(v2),5)]
+    if (tab2species != "all"){
+      tab2Data <- iris %>% filter(Species == tab2species)
+    } else {
+      tab2Data <- iris
+      }
     
-    tab2CtableData
-  })
-  # contigency table for tab 2
-  output$ctable <- renderTable({
-    a <- tab2CtableData()
-    table(a)
+    tab2Data <- tab2Data[,tab2variable]
+    
+    tab2Data
   })
   
-    # 
-  output$speciestable <- renderTable({
-    table(iris$Species)
+  # contigency table for tab 2
+  output$ctable <- renderTable({
+    value <- tab2Data()
+    table(value)
   })
+  
+  # numeric summary table for tab 2
+  output$stable <- renderPrint({
+    value <- tab2Data()
+    summary(value)
+  })
+  
     # subset species data for tab 4
     SpeciesData <- reactive({
       v <- input$v

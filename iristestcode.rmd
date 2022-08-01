@@ -21,6 +21,8 @@ install.packages("shinydashboard")
 a <- summary(iris$Sepal.Length)
 a
 table(iris$Sepal.Width)
+table(droplevels(iris$Species),iris$Sepal.Length)
+summary(iris)
 ```
 
 ## Including Plots

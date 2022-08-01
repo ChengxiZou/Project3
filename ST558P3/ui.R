@@ -10,6 +10,8 @@
 library(shiny)
 library(dplyr)
 library(shinydashboard)
+library(shinyjs)
+
 # Define UI for application that draws a histogram
 ui <- dashboardPage(
   dashboardHeader(title = "Dashboard"),
@@ -55,7 +57,9 @@ ui <- dashboardPage(
                           purpose of this app and some relevant knowledge about iris and flowers. I also added some
                           good pictures!"),br(),
                        
-                       h4("The second tab is for data exploration."),br(),
+                       h4("The second tab is for data exploration. You can select the species and variables, then
+                          the app will automatically present the contigency table, numeric summaries and
+                          relevant plots."),br(),
                        
                        h4("The third tab is for data modeling."),br(),
                        
@@ -80,24 +84,20 @@ ui <- dashboardPage(
       
       # Second tab content
       tabItem(tabName = "widgets",
+              
+              sidebarPanel(
+                selectizeInput("stab2", "Species", selected = "all", choices = c(levels(as.factor(iris$Species)),"all")),
+                selectizeInput("vtab2", "variable", selected = "Sepal.Length", choices = c("Sepal.Length",
+                                                                                     "Sepal.Width","Petal.Length",
+                                                                                     "Petal.Width"))
+              ),
+              
               fluidRow(
-                sidebarPanel(
-                  selectizeInput("v2", "Choose contingency table Variable", selected = "Sepal.Length", choices = c("Sepal.Length"=1,
-                                                                                       "Sepal.Width"=2,"Petal.Length"=3,
-                                                                                       "Petal.Width"=4))
-                ),
-                
-                box(
-                  title = "Controls",
-                  sliderInput("slider", "Number of observations:", 1, 100, 50)
-                ),
-                
-                box(tableOutput("summary")),
-                
-                box(tableOutput("ctable"))
-                
+                mainPanel(
+                box(id = "c",title = "contingency table",tableOutput("ctable")),
+                box(id = "s",title = "s table",tableOutput("stable"))
               )
-      ),
+      )),
       # 3rd tab content
       tabItem(tabName = "Modeling",
               h2("Modeling")
@@ -125,3 +125,4 @@ ui <- dashboardPage(
     )
   )
 )
+
