@@ -143,17 +143,25 @@ ui <- dashboardPage(
       ),
       # 3rd tab content: 1
       tabItem(tabName = "ModelingInfo",
+              sidebarPanel(selectizeInput("method", "method", selected = "GLM", choices = c("GLM",
+                                                                                                      "classification tree",
+                                                                                                      "Random Forest"))
+              ),
+              mainPanel(
+                h3("Model Information"),
+                uiOutput("minfo"),
+                uiOutput("jax")
+              )
+      ),
+      # 3rd tab content: 2
+      tabItem(tabName = "ModelFitting",
               sidebarPanel(
                 h4("choose the proportion of test data set"),
                 sliderInput(inputId = "pr", label = "proportion", min = 0.1, max = 0.9, value = 0.3, step = 0.1)
               ),
               mainPanel(
-              h2("choose the proportion of test data set")
+                h2("choose the proportion of test data set")
               )
-      ),
-      # 3rd tab content: 2
-      tabItem(tabName = "ModelFitting",
-              h2("Model Fitting")
       ),
       # 3rd tab content: 3
       tabItem(tabName = "Prediction",

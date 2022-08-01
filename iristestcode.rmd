@@ -14,12 +14,13 @@ knitr::opts_chunk$set(echo = TRUE)
 within the document. You can embed an R code chunk like this:
 
 ```{r cars}
-iris
 library(ggplot2)
 library(tidyverse)
 library(caret)
 library(ggplot2)
 library(tibble)
+library(tree)
+
 # rf
 rffit <- train(Species ~ Sepal.Length+ Sepal.Width + Petal.Length + Petal.Width, 
                data = iris, 
@@ -29,6 +30,26 @@ rffit <- train(Species ~ Sepal.Length+ Sepal.Width + Petal.Length + Petal.Width,
                tuneGrid = data.frame(mtry = 1:6))
 rffit
 summary(rffit)
+
+
+# classification tree
+# Split up predictor space into regions, different predictions for each region.
+# The goal of classification tree is to classify/predict group membership.
+# For a given region, usually use most prevalent class as prediction.
+fitTree <- tree(Species ~ Sepal.Length+ Sepal.Width + Petal.Length + Petal.Width, data = iris)
+plot(fitTree)
+text(fitTree)
+summary(fitTree)
+
+fitTree1 <- tree(Species ~ Sepal.Length+ Sepal.Width + Petal.Length + Petal.Width, data = iris, split = "deviance")
+plot(fitTree1)
+text(fitTree1)
+summary(fitTree1)
+# classification tree prediction
+predict(fitTree, newdata = )
+
+
+iris
 ```
 
 ## Including Plots

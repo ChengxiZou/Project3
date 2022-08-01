@@ -169,6 +169,57 @@ server <- function(input, output) {
        }
      )
     
+     # tab 4 model info
+     output$minfo <- renderUI({
+       if (input$method == "GLM") {text <- "If we want to predict a numeric variable based on the rest three numeric
+                                           variables and the species variable, the method would be Generalized Linear
+                                           Model. Pros: GLM can allow for responses from non-normal distributions. You
+                                           could find from the plotting sectionthat some data distributions are not
+                                           perfectly normal distributted. Glm also can have both types of predictors.
+                                           Here we have numeric and catagorical predictors so this method is great. Cons:
+                                           if we want to predict the species based on the rest four numeric variables, GLM
+                                           is probably not a good way because the response should be continouns."}
+       
+       else if (input$method == "classification tree") {text <- "If we want to predict the species based on the rest 
+                                                                 four numeric variables, classification tree is a
+                                                                 good method. It splits up predictor space into regions,
+                                                                 different predictions for each region. The goal of
+                                                                 classification tree is to classify/predict group
+                                                                 membership. For a given region, usually use most
+                                                                 prevalent class as prediction. Pros: it has a good
+                                                                 visualization, a tree plot that is easy to understand
+                                                                 and make predictions based on that. Cons:
+                                                                 it may require more computational time and lose
+                                                                 interpretability."}
+       
+       else if (input$method == "Random Forest") {text <- "If we care more about prediction rather than interpretation,
+                                                          we can average across many fitted trees, to decrease variance
+                                                          over an individual tree fit. Often use bootstrapping to get
+                                                          multiple samples to fit on. Can still look at variable importance
+                                                          though, but lose interpretability. The idea of the random forest
+                                                          is to create multiple trees from bootstrap samples and average
+                                                          results, but the difference is that it doesn't use all the predictors,
+                                                          instead, it uses a random subset of predictors for each bootstrap
+                                                          sample/tree fit. Pros: if there exists strong predictors, the
+                                                          random forest method can avoid strong correlation of predictors,
+                                                          to make those strong predictors not to dominate the tree fits.
+                                                          Cons: require more computational time and lose interpretability.
+                                                          "}
+       
+       h4(text)
+     })
+       
+     output$jax <- renderUI({
+       if (input$method == "GLM") {withMathJax(
+         helpText('GLM model example function
+               $$Sepal.Length=\\beta\\_0+\\beta\\_1\\cdot\\
+                  Sepal.Width+\\beta\\_2\\cdot\\
+                  Petal.Length+\\beta\\_3\\cdot\\
+                  Petal.Width+\\beta\\_4\\cdot\\
+                  Species$$'))}
+     })
+       
+       
      # Split train and test data for tab 3
      set.seed(1)
      trainIndex <- createDataPartition(iris$Species, p = 0.7, list = FALSE)
