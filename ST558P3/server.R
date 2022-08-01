@@ -11,7 +11,6 @@ library(shiny)
 library(ggplot2)
 library(dplyr)
 library(shinydashboard)
-library(shinyjs)
 
 server <- function(input, output) {
   # subset species data for tab 2
@@ -40,6 +39,99 @@ server <- function(input, output) {
   output$stable <- renderPrint({
     value <- tab2Data()
     summary(value)
+  })
+  
+  # subset species data for hist
+  pData <- reactive({
+    
+    pspecies <- input$hists
+    pvariable <- input$histv
+    
+    pData <- iris %>% filter(Species == pspecies)
+    
+    pData <- pData[,c(pvariable,"Species")]
+    
+    pData
+  })
+  
+  # subset species data for scatter plot
+  sData <- reactive({
+    sspecies <- input$ss
+    sData <- iris %>% filter(Species == sspecies)
+    if (input$vv == "Sepal.Length : Sepal.Width") {sData <- sData[,c(1,2,5)]}
+    if (input$vv == "Sepal.Length : Petal.Length") {sData <- sData[,c(1,3,5)]}
+    if (input$vv == "Sepal.Length : Petal.Width") {sData <- sData[,c(1,4,5)]}
+    if (input$vv == "Sepal.Width : Petal.Length") {sData <- sData[,c(2,3,5)]}
+    if (input$vv == "Sepal.Width : Petal.Width") {sData <- sData[,c(2,4,5)]}
+    if (input$vv == "Petal.Length : Petal.Width") {sData <- sData[,c(3,4,5)]}
+    sData
+  })
+  
+  # subset species data for box plot
+  bData <- reactive({
+    bvariable <- input$bv
+    bData <- iris[,c(bvariable,"Species")]
+    bData
+  })
+  
+  # data table for tab 2 scatter 
+  output$table2 <- renderTable({
+    Data2 <- sData()
+    Data2
+  })
+  # data table for tab 2 hist
+  output$table3 <- renderTable({
+    Data2 <- pData()
+    Data2
+  })
+  # data table for tab 2 box plot
+  output$tableb <- renderTable({
+    Data2 <- bData()
+    Data2
+  })
+  #create plot for tab 2
+  output$plot <- renderPlot({
+    if (input$pt == "histogram") {
+    d <- pData()
+    pvariable <- input$histv
+    g <- ggplot(d, aes_string(x=pvariable))
+      g + geom_bar(position = "dodge") + ggtitle("Histogram Plot")}
+    
+    else if (input$pt == "scatter plot" & input$vv == "Sepal.Length : Sepal.Width") {
+      dd <- sData()
+      g1 <- ggplot(dd, aes(x=Sepal.Length,y=Sepal.Width))
+      g1 + geom_point() + ggtitle("Scatter Plot")}
+    
+    else if (input$pt == "scatter plot" & input$vv == "Sepal.Length : Petal.Length") {
+      dd <- sData()
+      g1 <- ggplot(dd, aes(x=Sepal.Length,y=Petal.Length))
+      g1 + geom_point() + ggtitle("Scatter Plot")}
+    
+    else if (input$pt == "scatter plot" & input$vv == "Sepal.Length : Petal.Width") {
+      dd <- sData()
+      g1 <- ggplot(dd, aes(x=Sepal.Length,y=Petal.Width))
+      g1 + geom_point() + ggtitle("Scatter Plot")}
+    
+    else if (input$pt == "scatter plot" & input$vv == "Sepal.Width : Petal.Length") {
+      dd <- sData()
+      g1 <- ggplot(dd, aes(x=Sepal.Width,y=Petal.Length))
+      g1 + geom_point() + ggtitle("Scatter Plot")}
+    
+    else if (input$pt == "scatter plot" & input$vv == "Sepal.Width : Petal.Width") {
+      dd <- sData()
+      g1 <- ggplot(dd, aes(x=Sepal.Width,y=Petal.Width))
+      g1 + geom_point() + ggtitle("Scatter Plot")}
+    
+    else if (input$pt == "scatter plot" & input$vv == "Petal.Length : Petal.Width") {
+      dd <- sData()
+      g1 <- ggplot(dd, aes(x=Petal.Length,y=Petal.Width))
+      g1 + geom_point() + ggtitle("Scatter Plot")}
+    
+    else if (input$pt == "box plot") {
+      ddd <- bData()
+      bvariable <- input$bv
+      g2 <- ggplot(ddd, aes_string(x=bvariable))
+      g2 + geom_boxplot(aes(color = Species)) + ggtitle("Box Plot")} + coord_flip()
   })
   
     # subset species data for tab 4

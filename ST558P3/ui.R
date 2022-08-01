@@ -10,7 +10,6 @@
 library(shiny)
 library(dplyr)
 library(shinydashboard)
-library(shinyjs)
 
 # Define UI for application that draws a histogram
 ui <- dashboardPage(
@@ -57,9 +56,9 @@ ui <- dashboardPage(
                           purpose of this app and some relevant knowledge about iris and flowers. I also added some
                           good pictures!"),br(),
                        
-                       h4("The second tab is for data exploration. You can select the species and variables, then
-                          the app will automatically present the contigency table, numeric summaries and
-                          relevant plots."),br(),
+                       h4("The second tab is for data exploration. There exists two sections: numeric summary section
+                        and plotting section. For each section you can select the variables, then
+                          the app will automatically present the relevant results."),br(),
                        
                        h4("The third tab is for data modeling."),br(),
                        
@@ -86,16 +85,52 @@ ui <- dashboardPage(
       tabItem(tabName = "widgets",
               
               sidebarPanel(
+                # Summary Section
+                h4("Summary Section"),
+                h5("Choose variables for the contigency table and numeric summaries."),
                 selectizeInput("stab2", "Species", selected = "all", choices = c(levels(as.factor(iris$Species)),"all")),
                 selectizeInput("vtab2", "variable", selected = "Sepal.Length", choices = c("Sepal.Length",
                                                                                      "Sepal.Width","Petal.Length",
-                                                                                     "Petal.Width"))
+                                                                                     "Petal.Width")),
+                # Plotting Section
+                # histogram
+                h4("Plotting Section"),
+                h5("Choose variables for plotting."),
+                selectizeInput("pt", "plot type", selected = "histogram", choices = c("histogram",
+                                                                                      "scatter plot","box plot")),
+                conditionalPanel(
+                  condition = "input.pt == 'histogram'",
+                  selectizeInput("histv", "histogram variable", selected = "Sepal.Length", choices = c("Sepal.Length",
+                                                                                        "Sepal.Width","Petal.Length",
+                                                                                        "Petal.Width"))),
+                conditionalPanel(
+                  condition = "input.pt == 'histogram'",
+                  selectizeInput("hists", "histogram Species", selected = "setosa", choices = levels(as.factor(iris$Species)))),
+                
+                conditionalPanel(
+                  condition = "input.pt == 'scatter plot'",
+                  selectizeInput("ss", "scatter plot Species", selected = "setosa", choices = levels(as.factor(iris$Species)))),
+                
+                conditionalPanel(
+                  condition = "input.pt == 'scatter plot'",
+                  selectizeInput("vv", "variables", selected = "Sepal.Length:Sepal.Width", choices = c("Sepal.Length : Sepal.Width",
+                                                                                             "Sepal.Length : Petal.Length",
+                                                                                             "Sepal.Length : Petal.Width",
+                                                                                             "Sepal.Width : Petal.Length",
+                                                                                             "Sepal.Width : Petal.Width",
+                                                                                             "Petal.Length : Petal.Width"))),
+                conditionalPanel(
+                  condition = "input.pt == 'box plot'",
+                  selectizeInput("bv", "box plot variable", selected = "Sepal.Length", choices = c("Sepal.Length",
+                                                                                                       "Sepal.Width","Petal.Length",
+                                                                                                       "Petal.Width")))
               ),
               
               fluidRow(
                 mainPanel(
-                box(id = "c",title = "contingency table",tableOutput("ctable")),
-                box(id = "s",title = "s table",tableOutput("stable"))
+                box(id = "c",title = "Contingency Table",tableOutput("ctable")),
+                box(id = "s",title = "Numeric Summaries",tableOutput("stable")),
+                box(id = "p",title = "Plot",plotOutput("plot"))
               )
       )),
       # 3rd tab content
