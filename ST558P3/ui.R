@@ -19,7 +19,9 @@ ui <- dashboardPage(
     sidebarMenu(
       menuItem("About", tabName = "dashboard", icon = icon("th")),
       menuItem("Data Exploration", tabName = "widgets", icon = icon("th")),
-      menuItem("Modeling", tabName = "Modeling", icon = icon("th")),
+      menuItem("Modeling Info", tabName = "ModelingInfo", icon = icon("th")),
+      menuItem("Model Fitting", tabName = "ModelFitting", icon = icon("th")),
+      menuItem("Prediction", tabName = "Prediction", icon = icon("th")),
       menuItem("Data", tabName = "Data", icon = icon("th"))
     )
   ),
@@ -60,9 +62,17 @@ ui <- dashboardPage(
                         and plotting section. For each section you can select the variables, then
                           the app will automatically present the relevant results."),br(),
                        
-                       h4("The third tab is for data modeling."),br(),
+                       h4("The third tab is for Modeling Info. You should explain these three modeling approaches,
+                       the benefits of each, and the drawbacks of each. You should include some type of math type
+                          in the explanation"),br(),
                        
-                       h4("The fourth tab is for data browsing. There are two panels that you could select the
+                       h4("The fourth tab is for Model Fitting."),br(),
+                       
+                       h4("The fifth tab is for Modeling Info. You should give the user a way to use one of the
+                       models for prediction. That is, they should be able to select the values of the predictors
+                       and obtain a prediction for the response."),br(),
+                       
+                       h4("The final tab is for data browsing. There are two panels that you could select the
                           species and relevant variables of flowers. There is a download functionality as well."),br(),
                        
                        h1("Related pictures"),br(),
@@ -125,17 +135,29 @@ ui <- dashboardPage(
                                                                                                        "Sepal.Width","Petal.Length",
                                                                                                        "Petal.Width")))
               ),
-              
-              fluidRow(
                 mainPanel(
                 box(id = "c",title = "Contingency Table",tableOutput("ctable")),
                 box(id = "s",title = "Numeric Summaries",tableOutput("stable")),
                 box(id = "p",title = "Plot",plotOutput("plot"))
               )
-      )),
-      # 3rd tab content
-      tabItem(tabName = "Modeling",
-              h2("Modeling")
+      ),
+      # 3rd tab content: 1
+      tabItem(tabName = "ModelingInfo",
+              sidebarPanel(
+                h4("choose the proportion of test data set"),
+                sliderInput(inputId = "pr", label = "proportion", min = 0.1, max = 0.9, value = 0.3, step = 0.1)
+              ),
+              mainPanel(
+              h2("choose the proportion of test data set")
+              )
+      ),
+      # 3rd tab content: 2
+      tabItem(tabName = "ModelFitting",
+              h2("Model Fitting")
+      ),
+      # 3rd tab content: 3
+      tabItem(tabName = "Prediction",
+              h2("Prediction")
       ),
       # 4th tab content
       tabItem(tabName = "Data",

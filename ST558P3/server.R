@@ -11,7 +11,7 @@ library(shiny)
 library(ggplot2)
 library(dplyr)
 library(shinydashboard)
-
+library(caret)
 server <- function(input, output) {
   # subset species data for tab 2
   tab2Data <- reactive({
@@ -169,4 +169,10 @@ server <- function(input, output) {
        }
      )
     
+     # Split train and test data for tab 3
+     set.seed(1)
+     trainIndex <- createDataPartition(iris$Species, p = 0.7, list = FALSE)
+     train <- iris[trainIndex, ]
+     test <- iris[-trainIndex, ]
+     
   }

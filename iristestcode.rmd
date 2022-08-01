@@ -15,23 +15,20 @@ within the document. You can embed an R code chunk like this:
 
 ```{r cars}
 iris
-?iris
-install.packages()
-install.packages("shinydashboard")
-a <- summary(iris$Sepal.Length)
-a
-table(iris$Sepal.Width)
-table(droplevels(iris$Species),iris$Sepal.Length)
-summary(iris)
 library(ggplot2)
-    g <- ggplot(iris, aes(x = Sepal.Width))
-      g + geom_bar(position = "dodge")
-
-?aes_string
-
-a <-iris %>% filter(Species == "setosa")
-b <- a[,c("Sepal.Width","Species")]
-b
+library(tidyverse)
+library(caret)
+library(ggplot2)
+library(tibble)
+# rf
+rffit <- train(Species ~ Sepal.Length+ Sepal.Width + Petal.Length + Petal.Width, 
+               data = iris, 
+               method = "rf", 
+               trControl = trainControl(method = "cv", number = 5), 
+               preProcess = c("center", "scale"),
+               tuneGrid = data.frame(mtry = 1:6))
+rffit
+summary(rffit)
 ```
 
 ## Including Plots
