@@ -26,3 +26,5 @@ library(shinydashboard)
 install.packages(c("shiny", "ggplot2", "dplyr","shinydashboard"))
 
 # The shiny::runGitHub() code that we can copy and paste into RStudio to run your app.
+
+shiny::runGitHub("Project3", "ChengxiZou")
