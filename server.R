@@ -13,6 +13,7 @@ library(dplyr)
 library(shinydashboard)
 library(caret)
 library(randomForest)
+library(gbm)
 server <- function(input, output) {
   # subset species data for tab 2
   tab2Data <- reactive({
@@ -392,8 +393,6 @@ server <- function(input, output) {
      # fit models.
      # bagging
      bagging <- reactive({
-       testData<-testData()
-       trainData<-trainData()
        bagfit <- randomForest(Species ~ .,
                               data = data3(),
                               mty=ncol(iris)-1,
@@ -415,14 +414,13 @@ server <- function(input, output) {
      })
      # rf
      rffit <- reactive({
-       testData<-testData()
-       trainData<-trainData()
-       rffit <- train(Species ~ .,
-                      data = data3(),
-                      method = "rf", 
-                      trControl = trainControl(method = "cv", number = 5), 
-                      preProcess = c("center", "scale"),
-                      tuneGrid = data.frame(mtry = 1:6))
+       rffit <- randomForest(Species ~ .,data = data3())
+       #rffit <- train(Species ~ .,
+       #               data = data3(),
+       #               method = "rf", 
+       #               trControl = trainControl(method = "cv", number = 5), 
+       #               preProcess = c("center", "scale"),
+       #               tuneGrid = data.frame(mtry = 1:6))
        rffit
      })
      
@@ -432,28 +430,35 @@ server <- function(input, output) {
      })
      output$rffit2 <- renderTable({
        rffit <- rffit()
-       data.frame(rffit$results)
+       data.frame(rffit$importance)
      })
      output$rffit3 <- renderTable({
        rffit <- rffit()
-       data.frame(rffit$bestTune)
+       data.frame(rffit$confusion)
      })
      
      
      # boosting
      boosting <- reactive({
-       testData<-testData()
-       trainData<-trainData()
-       boosting <- train(Species ~ .,
-                            data = data3(),
-                            method = "gbm", 
-                            trControl = trainControl(method = "cv", number = 5), 
-                            preProcess = c("center", "scale"),
-                            tuneGrid = data.frame(expand.grid(n.trees = c(25,50,100,150,200), 
-                                                              interaction.depth = 1:4,
-                                                              shrinkage = 0.1,
-                                                              n.minobsinnode = 10)),
-                            verbose = FALSE)
+       boosting = gbm(Species ~.,
+                       data = data3(),
+                       distribution = "multinomial",
+                       cv.folds = 5,
+                       shrinkage = .01,
+                       n.minobsinnode = 10,
+                       n.trees = 100)
+       #boosting <- train(Species ~ .,
+       #                     data = data3(),
+       #                     method = "gbm", 
+       #                     trControl = trainControl(method = "cv", number = 5), 
+       #                     preProcess = c("center", "scale"),
+       #                     tuneGrid = data.frame(expand.grid(n.trees = c(25,50,100,150,200), 
+       #                                                       interaction.depth = 1:4,
+       #                                                       shrinkage = 0.1,
+       #                                                       n.minobsinnode = 10)),
+       #                     verbose = FALSE
+       #                  )
+       a <- summary(boosting)
        boosting
      })
      
@@ -463,21 +468,14 @@ server <- function(input, output) {
      })
      output$boosting2 <- renderTable({
        boosting <- boosting()
-       data.frame(boosting$results)
+       data.frame(summary(boosting))
      })
-     output$boosting3 <- renderTable({
+     output$boosting3 <- renderPlot({
        boosting <- boosting()
-       data.frame(boosting$bestTune)
+       summary(boosting)
      })
      
      # predict. bagged tree.
-    # bprediction <- reactive({
-     #  bagfit <- bagging()
-     #  predict(bagfit, newdata = data.frame(Sepal.Length=input$sl,
-     #                                       Sepal.Width=input$sw,
-     #                                       Petal.Length=input$pl,
-     #                                       Petal.Width=input$pw))
-     #})
      bprediction <- reactive({
        bagfit1 <- randomForest(Species ~ .,
                               data = iris,
@@ -493,4 +491,21 @@ server <- function(input, output) {
        species <- bprediction()
        data.frame(species)
      })
+     ##############
+     #boostedTfit <- train(Species ~ .,
+     #                     data = iris,
+     #                     method = "gbm", 
+     #                     trControl = trainControl(method = "cv", number = 5), 
+      #                    preProcess = c("center", "scale"),
+      #                    tuneGrid = data.frame(expand.grid(n.trees = c(25,50,100,150,200), 
+      #                                                      interaction.depth = 1:4,
+      #                                                      shrinkage = 0.1,
+      #                                                      n.minobsinnode = 10)),
+      #                    verbose = FALSE)
+     #
+    # output$prediction2 <- renderTable({
+     #  species <- bbprediction()
+     #  data.frame(species)
+     #})
+     
   }

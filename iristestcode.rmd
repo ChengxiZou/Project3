@@ -93,19 +93,34 @@ varImpPlot(rffit)
 
 boostedTfit <- train(Species ~ .,
                               data = iris,
-               method = "gbm", 
-               trControl = trainControl(method = "cv", number = 5), 
-               preProcess = c("center", "scale"),
-               tuneGrid = data.frame(expand.grid(n.trees = c(25,50,100,150,200), 
-                                                 interaction.depth = 1:4,
-                                                 shrinkage = 0.1,
-                                                 n.minobsinnode = 10)),
-               verbose = FALSE)
+               method = "gbm")
+boostedTfit
 plot(boostedTfit)
 
 iris
 aa
 data.frame(aa)
+
+rffit <- randomForest(Species ~ .,data = iris)
+rffit$confusion
+rffit$importance
+
+library(gbm)
+mod_gbm = gbm(Species ~.,
+              data = iris,
+              distribution = "multinomial",
+              cv.folds = 10,
+              shrinkage = .01,
+              n.minobsinnode = 10,
+              n.trees = 200)
+ a <- summary(mod_gbm)
+ a
+ print(mod_gbm)
+summary(mod_gbm)
+ mod_gbm
+ 
+aaa <- predict(mod_gbm, newdata = data.frame(Sepal.Length=6, Sepal.Width=6,Petal.Length=6,Petal.Width=6))
+ aaa
 ```
 
 ## Including Plots

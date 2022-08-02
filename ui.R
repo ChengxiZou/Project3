@@ -181,14 +181,14 @@ ui <- dashboardPage(
               mainPanel(
                 h2("Analysis Result"),
                 box(plotOutput("bag1"),title = "Bagging ImpPlot"),
-                box(tableOutput("bag2"),title = "importance"),
-                box(tableOutput("bag3"),title = "Confusion matrix"),
+                box(tableOutput("bag2"),title = "Bagging importance"),
+                box(tableOutput("bag3"),title = "Bagging Confusion matrix"),
                 box(plotOutput("rffit1"),title = "random forest CV accuracy"),
-                box(tableOutput("rffit2"),title = "random forest result"),
-                box(tableOutput("rffit3"),title = "random forest best tune"),
+                box(tableOutput("rffit2"),title = "random forest importance"),
+                box(tableOutput("rffit3"),title = "random forest Confusion matrix"),
                 box(plotOutput("boosting1"),title = "boosting CV accuracy"),
                 box(tableOutput("boosting2"),title = "boosting result"),
-                box(tableOutput("boosting3"),title = "boosting best tune")
+                box(plotOutput("boosting3"),title = "boosting best tune")
               )
       ),
       # 3rd tab content: 3
