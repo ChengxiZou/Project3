@@ -476,7 +476,7 @@ server <- function(input, output) {
      
      # boosting
      boosting <- reactive({
-       boosting = gbm(Species ~.,
+       boosting <- gbm(Species ~.,
                        data = data3(),
                        distribution = "multinomial",
                        cv.folds = 5,
@@ -570,8 +570,38 @@ server <- function(input, output) {
                                             Petal.Width=input$pw))
        species
      })
+     
+     # predict. rf
+     rfprediction <- reactive({
+       rffit <- randomForest(Species ~ .,data = iris)
+       species <- predict(rffit, newdata = data.frame(Sepal.Length=input$sl,
+                                                        Sepal.Width=input$sw,
+                                                        Petal.Length=input$pl,
+                                                        Petal.Width=input$pw))
+       species
+     })
+     
+     # predict. boosting
+     rfprediction <- reactive({
+       boosting <- gbm(Species ~.,
+                      data = iris,
+                      distribution = "multinomial",
+                      cv.folds = 5,
+                      shrinkage = .01,
+                      n.minobsinnode = 10,
+                      n.trees = 100)
+       
+       species <- predict(boosting, newdata = data.frame(Sepal.Length=input$sl,
+                                                      Sepal.Width=input$sw,
+                                                      Petal.Length=input$pl,
+                                                      Petal.Width=input$pw))
+       species
+     })
+     
      output$prediction <- renderTable({
-       species <- bprediction()
+       if (input$pmethod == "bagging"){species <- bprediction()}
+       if (input$pmethod == "Random Forest"){species <- rfprediction()}
+       if (input$pmethod == "boosting"){species <- bsprediction()}
        data.frame(species)
      })
      

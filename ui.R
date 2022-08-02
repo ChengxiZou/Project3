@@ -197,7 +197,10 @@ ui <- dashboardPage(
       ),
       # 3rd tab content: 3
       tabItem(tabName = "Prediction",
-              h2("Predict species using bagged tree method."),
+              h2("Predict species."),
+              selectizeInput("pmethod", "select method", selected = "bagging", choices = c("bagging",
+                                                                               "Random Forest",
+                                                                               "boosting")),
               numericInput(inputId = "sl",label = "Sepal.Length", value = 0,min = 0,max = 10,step = 0.1),
               numericInput(inputId = "sw",label = "Sepal.Width", value = 0,min = 0,max = 10,step = 0.1),
               numericInput(inputId = "pl",label = "Petal.Length", value = 0,min = 0,max = 10,step = 0.1),
