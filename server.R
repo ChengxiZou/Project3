@@ -582,7 +582,7 @@ server <- function(input, output) {
      })
      
      # predict. boosting
-     rfprediction <- reactive({
+     bsprediction <- reactive({
        boosting <- gbm(Species ~.,
                       data = iris,
                       distribution = "multinomial",
