@@ -384,6 +384,7 @@ server <- function(input, output) {
     data1 <- eventReactive(input$click1, {input$ptrain})
     data2 <- eventReactive(input$click1, {input$treevariable})
     data3 <- eventReactive(input$click1, {trainData()})
+    data4 <- eventReactive(input$click1, {testData()})
      # see train data
      output$tablett <- renderTable({
        t <- trainData()
@@ -400,18 +401,36 @@ server <- function(input, output) {
        bagfit
      })
      
+     # bagging predict
+     baggingp <- reactive({
+       bagfit <- bagging()
+       baggingp <- predict(bagfit, newdata = data4())
+       baggingp
+     })
+     
+     # bagging postResample
+     baggingpostResample <- reactive({
+       test <- data4()
+       baggingpostResample <- postResample(baggingp(), test$Species)
+       baggingpostResample
+     })
+     
+     # bagging output
      output$bag1 <- renderPlot({
        bagfit <- bagging()
        varImpPlot(bagfit)
      })
      output$bag2 <- renderTable({
        bagfit <- bagging()
-       data.frame(bagfit$importance)
+       dd <- bagfit$importance
+       data.frame("variable"=rownames(dd),dd)
      })
      output$bag3 <- renderTable({
        bagfit <- bagging()
-       data.frame(bagfit$confusion)
+       dd <- bagfit$confusion
+       data.frame("species"=rownames(dd),dd)
      })
+     
      # rf
      rffit <- reactive({
        rffit <- randomForest(Species ~ .,data = data3())
@@ -424,17 +443,34 @@ server <- function(input, output) {
        rffit
      })
      
+     # rf predict
+     rfp <- reactive({
+       rffit <- rffit()
+       rfp <- predict(rffit, newdata = data4())
+       rfp
+     })
+     
+     # rf postResample
+     rfpostResample <- reactive({
+       test <- data4()
+       rfpostResample <- postResample(rfp(), test$Species)
+       rfpostResample
+     })
+     
+     # rf output
      output$rffit1 <- renderPlot({
        rffit <- rffit()
        plot(rffit)
      })
      output$rffit2 <- renderTable({
        rffit <- rffit()
-       data.frame(rffit$importance)
+       dd <- rffit$importance
+       data.frame("variable"=rownames(dd),"Gini"=dd)
      })
      output$rffit3 <- renderTable({
        rffit <- rffit()
-       data.frame(rffit$confusion)
+       dd <- rffit$confusion
+       data.frame("species"=rownames(dd),dd)
      })
      
      
@@ -462,6 +498,53 @@ server <- function(input, output) {
        boosting
      })
      
+     # boosting predict
+     boostingp <- reactive({
+       boosting <- boosting()
+       boostingp <- predict(boosting, newdata = data4())
+       boostingp
+     })
+     
+     # boosting postResample
+     boostingpostResample <- reactive({
+       test <- data4()
+       boostingp <- boostingp()
+       k <- data.frame(boostingp)
+       for (i in 1:nrow(k)) {
+         if (max(k[i,1],k[i,2],k[i,3])==k[i,1]){
+           k[i,1] = 1
+           k[i,2]=0
+           k[i,3]=0
+         } else if (max(k[i,1],k[i,2],k[i,3])==k[i,2]){
+           k[i,2] = 1
+           k[i,1]=0
+           k[i,3]=0
+         }
+         else if (max(k[i,1],k[i,2],k[i,3])==k[i,3]){
+           k[i,3] = 1
+           k[i,1]=0
+           k[i,2]=0
+         }
+       }
+       
+       for (i in 1:nrow(k)) {
+         if (k[i,1] >0){
+           k[i,1] = 1
+         } 
+         if (k[i,2] >0){
+           k[i,2] = 1
+         }
+         if (k[i,3] >0){
+           k[i,3] = 1
+         }
+       }
+       
+       boostingpostResample <- postResample(k, test$Species)
+       boostingpostResample
+       
+     })
+     
+     # boosting output
      output$boosting1 <- renderPlot({
        boosting <- boosting()
        plot(boosting)
@@ -491,21 +574,23 @@ server <- function(input, output) {
        species <- bprediction()
        data.frame(species)
      })
-     ##############
-     #boostedTfit <- train(Species ~ .,
-     #                     data = iris,
-     #                     method = "gbm", 
-     #                     trControl = trainControl(method = "cv", number = 5), 
-      #                    preProcess = c("center", "scale"),
-      #                    tuneGrid = data.frame(expand.grid(n.trees = c(25,50,100,150,200), 
-      #                                                      interaction.depth = 1:4,
-      #                                                      shrinkage = 0.1,
-      #                                                      n.minobsinnode = 10)),
-      #                    verbose = FALSE)
-     #
-    # output$prediction2 <- renderTable({
-     #  species <- bbprediction()
-     #  data.frame(species)
-     #})
      
+     # postresample output
+     # baggingpostResample
+     # rfpostResample
+     # boostingpostResample
+     output$post1 <- renderTable({
+       baggingpostResample <- baggingpostResample()
+       data.frame(baggingpostResample,"Accuracy/Kappa" = c("Accuracy","Kappa"))
+     })
+     
+     output$post2 <- renderTable({
+       rfpostResample <- rfpostResample()
+       data.frame(rfpostResample,"Accuracy/Kappa" = c("Accuracy","Kappa"))
+     })
+     
+     output$post3 <- renderTable({
+       boostingpostResample <- boostingpostResample()
+       data.frame(boostingpostResample,"Accuracy/Kappa" = c("Accuracy","Kappa"))
+     })
   }

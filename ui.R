@@ -176,7 +176,8 @@ ui <- dashboardPage(
                                           "Sepal.Width : Petal.Length",
                                           "Sepal.Width : Petal.Width",
                                           "Petal.Length : Petal.Width")),
-                actionButton(inputId = "click1",label = "confirm p and variables")
+                actionButton(inputId = "click1",label = "confirm p and variables"),
+                h3("This would take a while to run!")
               ),
               mainPanel(
                 h2("Analysis Result"),
@@ -187,8 +188,11 @@ ui <- dashboardPage(
                 box(tableOutput("rffit2"),title = "random forest importance"),
                 box(tableOutput("rffit3"),title = "random forest Confusion matrix"),
                 box(plotOutput("boosting1"),title = "boosting CV accuracy"),
-                box(tableOutput("boosting2"),title = "boosting result"),
-                box(plotOutput("boosting3"),title = "boosting best tune")
+                box(tableOutput("boosting2"),title = "relative influence"),
+                box(plotOutput("boosting3"),title = "relative influence plot"),
+                box(tableOutput("post1"),title = "Bagging Accuracy and Kappa"),
+                box(tableOutput("post2"),title = "Random Forest Accuracy and Kappa"),
+                box(tableOutput("post3"),title = "Boosting Accuracy and Kappa")
               )
       ),
       # 3rd tab content: 3

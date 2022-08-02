@@ -121,6 +121,135 @@ summary(mod_gbm)
  
 aaa <- predict(mod_gbm, newdata = data.frame(Sepal.Length=6, Sepal.Width=6,Petal.Length=6,Petal.Width=6))
  aaa
+ 
+ bagfit <- randomForest(Species ~ Sepal.Length+ Sepal.Width + Petal.Length + Petal.Width, data = iris,mty=ncol(iris)-1,
+             ntree=200,importance=TRUE)
+bagfit
+summary(bagfit)
+
+       bagfit <- randomForest(Species ~ .,
+                              data = iris,
+                              mty=ncol(iris)-1,
+                              ntree=200)
+       bagfit
+data.frame(bagfit$importance)
+dd <- bagfit$importance
+apply(dd,MARGIN=1,function(dd) {print(rn(dd)); dd+1})
+
+dd
+data.frame(dd)
+rownames(dd)
+data.frame("variable"=rownames(dd),"Gini"=dd)
+
+
+data.frame(bagfit$confusion)
+
+
+bagfit <- randomForest(Species ~ Sepal.Length+ Sepal.Width + Petal.Length + Petal.Width, data = iris,mty=ncol(iris)-1,
+             ntree=200,importance=TRUE)
+aaa <- bagfit$confusion
+data.frame(aaa)
+summary(bagfit)
+
+bagfit <- randomForest(Species ~ Sepal.Length+ Sepal.Width + Petal.Length + Petal.Width, data = iris,mty=ncol(iris)-1,
+             ntree=200,importance=TRUE)
+bagfit
+       baggingp <- predict(bagfit, newdata = iris)
+       baggingpostResample <- postResample(baggingp, iris$Species)
+       baggingpostResample
+data.frame(baggingpostResample)
+
+
+       rffit <- randomForest(Species ~ .,data = iris)
+       rffit
+
+       rfp <- predict(rffit, newdata = iris)
+       rfp
+
+       rfpostResample <- postResample(rfp,iris$Species)
+       rfpostResample
+
+       
+
+
+       boosting = gbm(Species ~.,
+                       data = iris,
+                       distribution = "multinomial",
+                       cv.folds = 5,
+                       shrinkage = .01,
+                       n.minobsinnode = 10,
+                       n.trees = 100)
+       
+       boostingp <- predict(boosting, newdata = iris)
+
+       boostingpostResample <- postResample(boostingp, iris$Species)
+       boostingpostResample
+       colnames(boostingp)
+data.frame(boostingp)
+
+max(1,2,3)
+boostingp[9,2,1]
+
+
+for (i in 1:nrow(boostingp)) {
+  if (boostingp[i,1,1] < 0){
+  boostingp[i,1,1] = 0
+  } else {boostingp[i,1,1] = 1}
+    if (boostingp[i,2,1] < 0){
+  boostingp[i,2,1] = 0
+    }else {boostingp[i,2,1] = 1}
+    if (boostingp[i,3,1] < 0){
+  boostingp[i,3,1] = 0
+}else {boostingp[i,3,1] = 1}
+}
+
+for (i in 1:nrow(boostingp)) {
+  if (max(boostingp[i,1,1],boostingp[i,2,1],boostingp[i,3,1])==boostingp[i,1,1]){
+  boostingp[i,1,1] = 1
+  boostingp[i,2,1]=0
+  boostingp[i,3,1]=0
+  } else if (max(boostingp[i,1,1],boostingp[i,2,1],boostingp[i,3,1])==boostingp[i,2,1]){
+  boostingp[i,2,1] = 1
+  boostingp[i,1,1]=0
+  boostingp[i,3,1]=0
+  }
+  else if (max(boostingp[i,1,1],boostingp[i,2,1],boostingp[i,3,1])==boostingp[i,3,1]){
+  boostingp[i,1,1] = 1
+  boostingp[i,1,1]=0
+  boostingp[i,2,1]=0
+  }
+}
+boostingp <- predict(boosting, newdata = iris)
+       k <- data.frame(boostingp)
+       for (i in 1:nrow(boostingp)) {
+         if (max(k[i,1],k[i,2],k[i,3])==k[i,1]){
+           k[i,1] = 1
+           k[i,2]=0
+           k[i,3]=0
+         } else if (max(k[i,1],k[i,2],k[i,3])==k[i,2]){
+           k[i,2] = 1
+           k[i,1]=0
+           k[i,3]=0
+         }
+         else if (max(k[i,1],k[i,2],k[i,3])==k[i,3]){
+           k[i,1] = 1
+           k[i,1]=0
+           k[i,2]=0
+         }
+       }
+       
+              for (i in 1:nrow(k)) {
+         if (k[i,1] >0){
+           k[i,1] = 1
+         } 
+         if (k[i,2] >0){
+           k[i,2] = 1
+         }
+         if (k[i,3] >0){
+           k[i,3] = 1
+         }
+       }
+       k
 ```
 
 ## Including Plots
