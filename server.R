@@ -12,6 +12,7 @@ library(ggplot2)
 library(dplyr)
 library(shinydashboard)
 library(caret)
+library(randomForest)
 server <- function(input, output) {
   # subset species data for tab 2
   tab2Data <- reactive({
@@ -180,7 +181,7 @@ server <- function(input, output) {
                                            if we want to predict the species based on the rest four numeric variables, GLM
                                            is probably not a good way because the response should be continouns."}
        
-       else if (input$method == "classification tree") {text <- "If we want to predict the species based on the rest 
+       else if (input$method == "bagging") {text <- "If we want to predict the species based on the rest 
                                                                  four numeric variables, classification tree is a
                                                                  good method. It splits up predictor space into regions,
                                                                  different predictions for each region. The goal of
@@ -188,9 +189,16 @@ server <- function(input, output) {
                                                                  membership. For a given region, usually use most
                                                                  prevalent class as prediction. Pros: it has a good
                                                                  visualization, a tree plot that is easy to understand
-                                                                 and make predictions based on that. Cons:
-                                                                 it may require more computational time and lose
-                                                                 interpretability."}
+                                                                 and make predictions based on that. Predictorsdon't need
+                                                                 to be scaled. No statistical assumptions needed. Cons:
+                                                                 Small changes in data may strongly change the tree, need
+                                                                 to prune. it may require more computational time and lose
+                                                                 interpretability, but gain in prediction.
+                                                                 Bagging is to resample from the data (in our case non-parametric),
+                                                                 treat sample as population, resample with relpacement, method or
+                                                                 estimation applied to each resample, which is quite useful
+                                                                 when theoretical results are difficult to derive.
+                                                                 "}
        
        else if (input$method == "Random Forest") {text <- "If we care more about prediction rather than interpretation,
                                                           we can average across many fitted trees, to decrease variance
@@ -206,6 +214,12 @@ server <- function(input, output) {
                                                           Cons: require more computational time and lose interpretability.
                                                           "}
        
+       else if (input$method == "boosting") {text <- "Boosting is a way that slowly trains the tree so that the tree do not
+                                                      over fit. Boosting let the tree grow sequencially.
+                                                      each subsequent tree is grown on a modified version of original data.
+                                                      The predictions would be updated with tree growing. Pros: the tree
+                                                      won't overfit. Cons: may cause a lot more computational time.
+                                                     "}
        h4(text)
      })
        
@@ -216,14 +230,267 @@ server <- function(input, output) {
                   Sepal.Width+\\beta\\_2\\cdot\\
                   Petal.Length+\\beta\\_3\\cdot\\
                   Petal.Width+\\beta\\_4\\cdot\\
-                  Species$$'))}
+                  Species$$'),
+         helpText('We are not using GLM here because this app focus on predicting species! '))}
+       
+       else if (input$method == "bagging") {withMathJax(
+         helpText('Prediction error (MSE usually used)
+               $$MSE = \\frac{1}{n_(testObs)}
+                  \\sum_{i=1}^{n_(testObs)}(y_i-
+                  \\hat(y_i))^2$$'),
+         helpText('MSE can be broken down into squared bias plus variance.'),
+         helpText('Each tree here has low bias but high variance.'),
+         helpText('Averaging trees decreases variance.'))}
+       
+       else if (input$method == "Random Forest") {withMathJax(
+         helpText('Classicifation: usually use
+               $$m = \\sqrt
+                  p$$'),
+         helpText('Regression: usually use
+               $$m = p/3$$'),
+         helpText('If m=p then you have bagging.'),
+         helpText('can determine m through OOB error.'))}
+       
+       else if (input$method == "boosting") {withMathJax(
+         helpText('The process of boosting tree:'),
+         helpText('1. Initialized prediction as 0.'),
+         helpText('2. Find residuals(observed-predicted).'),
+         helpText('3. Fit a tree with d splits(d + 1 terminal nodes) treating the residuals as response.'),
+         helpText('4. Update predictions.'),
+         helpText('5. Update residuals for new predictions and repeat B times.')
+         )}
      })
        
        
      # Split train and test data for tab 3
-     set.seed(1)
-     trainIndex <- createDataPartition(iris$Species, p = 0.7, list = FALSE)
-     train <- iris[trainIndex, ]
-     test <- iris[-trainIndex, ]
+     train <- reactive({
+       set.seed(1)
+       trainIndex <- createDataPartition(iris$Species, p = data1(), list = FALSE)
+       train <- iris[trainIndex, ]
+       train
+     })
      
+     test <- reactive({
+       set.seed(1)
+       trainIndex <- createDataPartition(iris$Species, p = data1(), list = FALSE)
+       train <- iris[trainIndex, ]
+       test <- iris[-trainIndex, ]
+       test
+     })
+     
+     # subset train and test data for tab 3
+     trainData <- reactive({
+       trainData <- train()
+       "Sepal.Width : Petal.Length : Petal.Width"
+       if (data2() == "Sepal.Length : Sepal.Width") {
+         trainData <-trainData[,c(1,2,5)]
+         }
+       
+       else if (data2() == "Sepal.Width : Petal.Length : Petal.Width") {
+         trainData <-trainData[,c(2,3,4,5)]
+       }
+       
+       else if (data2() == "Sepal.Length : Petal.Length : Petal.Width") {
+         trainData <-trainData[,c(1,3,4,5)]
+       }
+       
+       else if (data2() == "Sepal.Length : Sepal.Width : Petal.Width") {
+         trainData <-trainData[,c(1,2,4,5)]
+       }
+       
+       else if (data2() == "Sepal.Length : Sepal.Width : Petal.Length") {
+         trainData <-trainData[,c(1,2,3,5)]
+       }
+       
+       else if (data2() == "Sepal.Length : Sepal.Width : Petal.Length : Petal.Width") {
+         trainData <-trainData
+       }
+       
+       else if (data2() == "Sepal.Length : Petal.Length") {
+         trainData <-trainData[,c(1,3,5)]
+         }
+       
+       else if (data2() == "Sepal.Length : Petal.Width") {
+         trainData <-trainData[,c(1,4,5)]
+         }
+       
+       else if (data2() == "Sepal.Width : Petal.Length") {
+         trainData <-trainData[,c(2,3,5)]
+         }
+       
+       else if (data2() == "Sepal.Width : Petal.Width") {
+         trainData <-trainData[,c(2,4,5)]
+         }
+       
+       else if (data2() == "Petal.Length : Petal.Width") {
+         trainData <-trainData[,c(3,4,5)]
+       }
+       
+       trainData
+     })
+     
+     testData <- reactive({
+       testData <- test()
+       "Sepal.Width : Petal.Length : Petal.Width"
+       if (data2() == "Sepal.Length : Sepal.Width") {
+         testData <-testData[,c(1,2,5)]
+       }
+       
+       else if (data2() == "Sepal.Width : Petal.Length : Petal.Width") {
+         testData <-testData[,c(2,3,4,5)]
+       }
+       
+       else if (data2() == "Sepal.Length : Petal.Length : Petal.Width") {
+         testData <-testData[,c(1,3,4,5)]
+       }
+       
+       else if (data2() == "Sepal.Length : Sepal.Width : Petal.Width") {
+         testData <-testData[,c(1,2,4,5)]
+       }
+       
+       else if (data2() == "Sepal.Length : Sepal.Width : Petal.Length") {
+         testData <-testData[,c(1,2,3,5)]
+       }
+       
+       else if (data2() == "Sepal.Length : Sepal.Width : Petal.Length : Petal.Width") {
+         testData <-testData
+       }
+       
+       else if (data2() == "Sepal.Length : Petal.Length") {
+         testData <-testData[,c(1,3,5)]
+       }
+       
+       else if (data2() == "Sepal.Length : Petal.Width") {
+         testData <-testData[,c(1,4,5)]
+       }
+       
+       else if (data2() == "Sepal.Width : Petal.Length") {
+         testData <-testData[,c(2,3,5)]
+       }
+       
+       else if (data2() == "Sepal.Width : Petal.Width") {
+         testData <-testData[,c(2,4,5)]
+       }
+       
+       else if (data2() == "Petal.Length : Petal.Width") {
+         testData <-testData[,c(3,4,5)]
+       }
+       
+       testData
+     })
+     
+     # click1
+    data1 <- eventReactive(input$click1, {input$ptrain})
+    data2 <- eventReactive(input$click1, {input$treevariable})
+    data3 <- eventReactive(input$click1, {trainData()})
+     # see train data
+     output$tablett <- renderTable({
+       t <- trainData()
+       t
+     })
+     
+     # fit models.
+     # bagging
+     bagging <- reactive({
+       testData<-testData()
+       trainData<-trainData()
+       bagfit <- randomForest(Species ~ .,
+                              data = data3(),
+                              mty=ncol(iris)-1,
+                              ntree=200,importance=TRUE)
+       bagfit
+     })
+     
+     output$bag1 <- renderPlot({
+       bagfit <- bagging()
+       varImpPlot(bagfit)
+     })
+     output$bag2 <- renderTable({
+       bagfit <- bagging()
+       data.frame(bagfit$importance)
+     })
+     output$bag3 <- renderTable({
+       bagfit <- bagging()
+       data.frame(bagfit$confusion)
+     })
+     # rf
+     rffit <- reactive({
+       testData<-testData()
+       trainData<-trainData()
+       rffit <- train(Species ~ .,
+                      data = data3(),
+                      method = "rf", 
+                      trControl = trainControl(method = "cv", number = 5), 
+                      preProcess = c("center", "scale"),
+                      tuneGrid = data.frame(mtry = 1:6))
+       rffit
+     })
+     
+     output$rffit1 <- renderPlot({
+       rffit <- rffit()
+       plot(rffit)
+     })
+     output$rffit2 <- renderTable({
+       rffit <- rffit()
+       data.frame(rffit$results)
+     })
+     output$rffit3 <- renderTable({
+       rffit <- rffit()
+       data.frame(rffit$bestTune)
+     })
+     
+     
+     # boosting
+     boosting <- reactive({
+       testData<-testData()
+       trainData<-trainData()
+       boosting <- train(Species ~ .,
+                            data = data3(),
+                            method = "gbm", 
+                            trControl = trainControl(method = "cv", number = 5), 
+                            preProcess = c("center", "scale"),
+                            tuneGrid = data.frame(expand.grid(n.trees = c(25,50,100,150,200), 
+                                                              interaction.depth = 1:4,
+                                                              shrinkage = 0.1,
+                                                              n.minobsinnode = 10)),
+                            verbose = FALSE)
+       boosting
+     })
+     
+     output$boosting1 <- renderPlot({
+       boosting <- boosting()
+       plot(boosting)
+     })
+     output$boosting2 <- renderTable({
+       boosting <- boosting()
+       data.frame(boosting$results)
+     })
+     output$boosting3 <- renderTable({
+       boosting <- boosting()
+       data.frame(boosting$bestTune)
+     })
+     
+     # predict. bagged tree.
+    # bprediction <- reactive({
+     #  bagfit <- bagging()
+     #  predict(bagfit, newdata = data.frame(Sepal.Length=input$sl,
+     #                                       Sepal.Width=input$sw,
+     #                                       Petal.Length=input$pl,
+     #                                       Petal.Width=input$pw))
+     #})
+     bprediction <- reactive({
+       bagfit1 <- randomForest(Species ~ .,
+                              data = iris,
+                              mty=ncol(iris)-1,
+                              ntree=200,importance=TRUE)
+       species <- predict(bagfit1, newdata = data.frame(Sepal.Length=input$sl,
+                                            Sepal.Width=input$sw,
+                                            Petal.Length=input$pl,
+                                            Petal.Width=input$pw))
+       species
+     })
+     output$prediction <- renderTable({
+       species <- bprediction()
+       data.frame(species)
+     })
   }

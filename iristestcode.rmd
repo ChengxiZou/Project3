@@ -20,7 +20,7 @@ library(caret)
 library(ggplot2)
 library(tibble)
 library(tree)
-
+library(randomForest)
 # rf
 rffit <- train(Species ~ Sepal.Length+ Sepal.Width + Petal.Length + Petal.Width, 
                data = iris, 
@@ -46,10 +46,66 @@ plot(fitTree1)
 text(fitTree1)
 summary(fitTree1)
 # classification tree prediction
-predict(fitTree, newdata = )
+aa <- predict(fitTree, newdata = data.frame(Sepal.Length=6, Sepal.Width=6,Petal.Length=6,Petal.Width=6))
 
 
 iris
+rffit <- train(Species ~ Sepal.Length+ Sepal.Width + Petal.Length + Petal.Width, data = iris, 
+               method = "bag", 
+               trControl = trainControl(method = "cv", number = 5), 
+               preProcess = c("center", "scale"),
+               tuneGrid = data.frame(mtry = 1:6))
+rffit
+bagfit <- randomForest(Species ~ Sepal.Length+ Sepal.Width + Petal.Length + Petal.Width, data = iris,mty=ncol(iris)-1,
+             ntree=200,importance=TRUE)
+bagfit
+summary(bagfit)
+
+RMSE <- sqrt(mean())
+
+
+
+
+       bagfit <- randomForest(Species ~ .,
+                              data = iris,
+                              mty=ncol(iris)-1,
+                              ntree=200)
+       bagfit
+data.frame(bagfit$importance)
+data.frame(bagfit$confusion)
+
+       plot(bagfit)
+       text(bagfit)
+varImpPlot(bagfit)
+
+rffit <- train(Species ~ .,
+                              data = iris,
+               method = "rf", 
+               trControl = trainControl(method = "cv", number = 5), 
+               preProcess = c("center", "scale"),
+               tuneGrid = data.frame(mtry = 1:12))
+rffit
+rffit$results
+rffit$bestTune
+plot(rffit)
+varImpPlot(rffit)
+
+
+boostedTfit <- train(Species ~ .,
+                              data = iris,
+               method = "gbm", 
+               trControl = trainControl(method = "cv", number = 5), 
+               preProcess = c("center", "scale"),
+               tuneGrid = data.frame(expand.grid(n.trees = c(25,50,100,150,200), 
+                                                 interaction.depth = 1:4,
+                                                 shrinkage = 0.1,
+                                                 n.minobsinnode = 10)),
+               verbose = FALSE)
+plot(boostedTfit)
+
+iris
+aa
+data.frame(aa)
 ```
 
 ## Including Plots

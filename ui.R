@@ -10,7 +10,7 @@
 library(shiny)
 library(dplyr)
 library(shinydashboard)
-
+library(randomForest)
 # Define UI for application that draws a histogram
 ui <- dashboardPage(
   dashboardHeader(title = "Dashboard"),
@@ -66,7 +66,10 @@ ui <- dashboardPage(
                        the benefits of each, and the drawbacks of each. You should include some type of math type
                           in the explanation"),br(),
                        
-                       h4("The fourth tab is for Model Fitting."),br(),
+                       h4("The fourth tab is for Model Fitting. First, split the data into a training and test set.
+                       The app has the ability to choose the proportion of data used in each. It can also choose
+                          the variables used in the data set. Once you've chosen the p and variables, hit the botton
+                          below then the subset data would be generated for analysis."),br(),
                        
                        h4("The fifth tab is for Modeling Info. You should give the user a way to use one of the
                        models for prediction. That is, they should be able to select the values of the predictors
@@ -143,9 +146,9 @@ ui <- dashboardPage(
       ),
       # 3rd tab content: 1
       tabItem(tabName = "ModelingInfo",
-              sidebarPanel(selectizeInput("method", "method", selected = "GLM", choices = c("GLM",
-                                                                                                      "classification tree",
-                                                                                                      "Random Forest"))
+              sidebarPanel(selectizeInput("method", "method", selected = "GLM", choices = c("GLM", "bagging",
+                                                                                            "Random Forest",
+                                                                                            "boosting"))
               ),
               mainPanel(
                 h3("Model Information"),
@@ -156,16 +159,46 @@ ui <- dashboardPage(
       # 3rd tab content: 2
       tabItem(tabName = "ModelFitting",
               sidebarPanel(
-                h4("choose the proportion of test data set"),
-                sliderInput(inputId = "pr", label = "proportion", min = 0.1, max = 0.9, value = 0.3, step = 0.1)
+                h4("Split the data into a training and test set."),
+                h4("choose the proportion of training data set"),
+                sliderInput(inputId = "ptrain", label = "proportion", min = 0.3, max = 0.9, value = 0.7, step = 0.1),
+                selectizeInput("treevariable", "Select variables",
+                               selected = "Sepal.Length : Sepal.Width : Petal.Length : Petal.Width",
+                               
+                               choices = c("Sepal.Length : Sepal.Width : Petal.Length : Petal.Width",
+                                           "Sepal.Length : Sepal.Width : Petal.Length",
+                                           "Sepal.Length : Sepal.Width : Petal.Width",
+                                           "Sepal.Length : Petal.Length : Petal.Width",
+                                           "Sepal.Width : Petal.Length : Petal.Width",
+                                          "Sepal.Length : Sepal.Width",
+                                          "Sepal.Length : Petal.Length",
+                                          "Sepal.Length : Petal.Width",
+                                          "Sepal.Width : Petal.Length",
+                                          "Sepal.Width : Petal.Width",
+                                          "Petal.Length : Petal.Width")),
+                actionButton(inputId = "click1",label = "confirm p and variables")
               ),
               mainPanel(
-                h2("choose the proportion of test data set")
+                h2("Analysis Result"),
+                box(plotOutput("bag1"),title = "Bagging ImpPlot"),
+                box(tableOutput("bag2"),title = "importance"),
+                box(tableOutput("bag3"),title = "Confusion matrix"),
+                box(plotOutput("rffit1"),title = "random forest CV accuracy"),
+                box(tableOutput("rffit2"),title = "random forest result"),
+                box(tableOutput("rffit3"),title = "random forest best tune"),
+                box(plotOutput("boosting1"),title = "boosting CV accuracy"),
+                box(tableOutput("boosting2"),title = "boosting result"),
+                box(tableOutput("boosting3"),title = "boosting best tune")
               )
       ),
       # 3rd tab content: 3
       tabItem(tabName = "Prediction",
-              h2("Prediction")
+              h2("Predict species using bagged tree method."),
+              numericInput(inputId = "sl",label = "Sepal.Length", value = 0,min = 0,max = 10,step = 0.1),
+              numericInput(inputId = "sw",label = "Sepal.Width", value = 0,min = 0,max = 10,step = 0.1),
+              numericInput(inputId = "pl",label = "Petal.Length", value = 0,min = 0,max = 10,step = 0.1),
+              numericInput(inputId = "pw",label = "Petal.Width", value = 0,min = 0,max = 10,step = 0.1),
+              box(tableOutput("prediction"),title = "Prediction")
       ),
       # 4th tab content
       tabItem(tabName = "Data",
